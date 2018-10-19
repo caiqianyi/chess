@@ -118,11 +118,26 @@ public class SocketServerHandler {
 	@OnClose
     public void onClose(Session session){
 		try{
-			IUserService userService = BeanFactoryUtils
-					.getBean(IUserService.class);
-			userService.logout(userId);
+			IMessageHandler handlerAction10003 = (IMessageHandler) BeanFactoryUtils
+					.getBean("msg_action_" + "10003");
+			if (handlerAction10003 != null) {
+				SocketRequest request = new SocketRequest();
+				request.setFrom(userId);
+				request.setMsgId("10003");
+				handlerAction10003.doAction(session,
+						request);
+			}
+			IMessageHandler handlerAction20004 = (IMessageHandler) BeanFactoryUtils
+					.getBean("msg_action_" + "20004");
+			if (handlerAction20004 != null) {
+				SocketRequest request = new SocketRequest();
+				request.setFrom(userId);
+				request.setMsgId("20004");
+				handlerAction20004.doAction(session,
+						request);
+			}
 		}catch(Exception e){
-			
+			e.printStackTrace();
 		}
 		
     }

@@ -12,9 +12,11 @@ $(function(){
 	Socket.prototype.action_200 = function(msg){
 		if(so != null){
 			console.info(msg);
-			if(msg && msg.response.data){
+			if(msg && !msg.response.data){
 				var nickname = prompt("请输入您的昵称?");
 				so.sendMessage({"msgId":"10002","params":{"nickname":nickname}});
+			}else{
+				so.sendMessage({"msgId":"10002","params":{"nickname":""}});
 			}
 		}
 	}

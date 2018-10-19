@@ -103,6 +103,7 @@ public class SocketServerHandler {
 				}
 			}
 		}catch(Exception e){
+			e.printStackTrace();
 			SocketResponse response = new SocketResponse();
 			response.setFrom(userId);
 			response.setMsgId("500");
@@ -116,9 +117,14 @@ public class SocketServerHandler {
 	 */
 	@OnClose
     public void onClose(Session session){
-		IUserService userService = BeanFactoryUtils
-				.getBean(IUserService.class);
-		userService.logout(userId);
+		try{
+			IUserService userService = BeanFactoryUtils
+					.getBean(IUserService.class);
+			userService.logout(userId);
+		}catch(Exception e){
+			
+		}
+		
     }
 
 	/**

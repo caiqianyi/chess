@@ -63,6 +63,7 @@ public class UserServiceImpl implements IUserService {
 		Session session = webSessionMessageService.get(userId);
 		if(session != null){
 			webSessionMessageService.remove(userId);
+			logger.debug("userId={}",userId);
 			User user = (User) redisHash.hGet(USER_CACHE_KEY, userId);
 			if(user != null && user.isOnline()){
 				user.setLogoutTime(new Date());

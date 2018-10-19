@@ -74,32 +74,40 @@ public class SocketServerHandler {
 
 	@OnMessage
 	public void onMessage(Session session, String body) {
-		if (StringUtils.isNotBlank(body)) {
-			SocketRequest request = JSONObject.parseObject(body,
-					SocketRequest.class);
-			if (request != null) {
-				if (!"10001".equals(request.getMsgId())) {// 不是心跳
-					logger.debug("body={}", body);
-				}
-				IMessageHandler handlerAction = (IMessageHandler) BeanFactoryUtils
-						.getBean("msg_action_" + request.getMsgId());
-				if (handlerAction == null) {
-					logger.error("errcode={},errmsg={},mp={}", "404", "未发现消息‘"
-							+ request.getMsgId() + "’",
-							new Gson().equals(request));
-					return;
-					// throw new
-					// I18nMessageException("404","未发现消息‘"+mp.getMsgId()+"’");
-				}
-				SocketResponse response = handlerAction.doAction(session,
-						request);
-				if (response != null) {
-					String message = new Gson().toJson(response);
-					logger.debug("send|message={}", message);
-					RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
-					rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
+		try{
+			if (StringUtils.isNotBlank(body)) {
+				SocketRequest request = JSONObject.parseObject(body,
+						SocketRequest.class);
+				if (request != null) {
+					if (!"10001".equals(request.getMsgId())) {// 不是心跳
+						logger.debug("body={}", body);
+					}
+					IMessageHandler handlerAction = (IMessageHandler) BeanFactoryUtils
+							.getBean("msg_action_" + request.getMsgId());
+					if (handlerAction == null) {
+						logger.error("errcode={},errmsg={},mp={}", "404", "未发现消息‘"
+								+ request.getMsgId() + "’",
+								new Gson().equals(request));
+						return;
+						// throw new
+						// I18nMessageException("404","未发现消息‘"+mp.getMsgId()+"’");
+					}
+					SocketResponse response = handlerAction.doAction(session,
+							request);
+					if (response != null) {
+						String message = new Gson().toJson(response);
+						logger.debug("send|message={}", message);
+						RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
+						rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
+					}
 				}
 			}
+		}catch(Exception e){
+			SocketResponse response = new SocketResponse();
+			response.setFrom(userId);
+			response.setMsgId("500");
+			response.setResponse(ResponseMessage.error("500", "系统异常"));
+			WebSessionMessageServiceImpl.send(session, new Gson().toJson(response));
 		}
 	}
 

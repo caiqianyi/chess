@@ -62,14 +62,15 @@ public class RoomServiceImpl implements IRoomService {
 		return null;
 	}
 	
-	private RoomMember findMember(List<RoomMember> members,String userId){
-		for(RoomMember member : members){
+	private int findMember(List<RoomMember> members,String userId){
+		for(int i=0;i<members.size();i++){
+			RoomMember member = members.get(i);
 			String uid = member.getUser().getUserId();
 			if(uid.equals(userId)){
-				return member;
+				return i;
 			}
 		}
-		return null;
+		return -1;
 	}
 	private RoomMember findMemberByRole(List<RoomMember> members,String role){
 		for(RoomMember member : members){
@@ -100,22 +101,25 @@ public class RoomServiceImpl implements IRoomService {
 			Room room = findById(roomId);
 			if(room != null){
 				List<RoomMember> members = room.getMembers();
-				RoomMember member = findMember(members, userId);
+				int i = findMember(members, userId);
+				
 				String role = getMemberRole(room.getMembers());
-				if(member == null){
+				RoomMember member = null;
+				if(i > -1){
+					member = members.get(i);
+				}else{
 					member = new RoomMember();
+					member.setRole(role);
+					member.setUser(user);
+					members.add(member);
 				}
 				member.setJoinDate(new Date());
-				member.setRole(role);
-				member.setUser(user);
-				
-				members.add(member);
 				room.setMembers(members);
-				
 				user.setRoomId(roomId);
 				userService.update(user);
 				redisHash.hSet(ROOM_CACHE_KEY, roomId, room);
 				return member;
+				
 			}
 		}
 		return null;
@@ -129,13 +133,13 @@ public class RoomServiceImpl implements IRoomService {
 			Room room = findById(roomId);
 			if(room != null){
 				List<RoomMember> members = room.getMembers();
-				RoomMember member = findMember(members, userId);
-				if(member != null){
-					
+				int i = findMember(members, userId);
+				if(i > -1){
+					RoomMember member = members.get(i);
 					user.setRoomId(null);
 					userService.update(user);
 					
-					members.remove(member);
+					members.remove(i);
 					room.setMembers(members);
 					redisHash.hSet(ROOM_CACHE_KEY, roomId, room);
 					return member;

@@ -28,7 +28,7 @@ public class RoomJoinMessageHandler implements IMessageHandler {
 		RoomMember member = roomService.joinRoom(roomId, userId);
 		
 		String to = roomService.getBroadcastTo(roomId);
-		if(StringUtils.isBlank(to)){
+		if(StringUtils.isNotBlank(to)){
 			SocketResponse response = new SocketResponse();
 			response.setFrom(userId);
 			response.setMsgId(request.getMsgId());

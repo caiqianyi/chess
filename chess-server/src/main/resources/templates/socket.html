@@ -39,8 +39,16 @@ $(function(){
 			$("#log").append("<br/>"+"获取房间号"+JSON.stringify(msg));
 			if(!msg.response.data){
 				so.sendMessage({"msgId":"20001"});
+				return;
 			}
-			return;
+			var room = msg.response.data;
+			so.sendMessage({"msgId":"20003","params":{"roomId":room.id}});
+		}
+	}
+	Socket.prototype.action_20003 = function(msg){
+		console.info("20003"+JSON.stringify(msg));
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+"进入房间"+JSON.stringify(msg));
 		}
 	}
 	so = new Socket(userId);

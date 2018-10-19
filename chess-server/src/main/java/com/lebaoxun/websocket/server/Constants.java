@@ -2,7 +2,7 @@ package com.lebaoxun.websocket.server;
 
 public class Constants {
 	
-	public static final String SERVER = "8081";
+	public static final String SERVER = "8082";
 	
 	public static final String BROADCAST = "websocket.broadcast";
 	public static final String BROADCAST_QUQUE = "websocket.broadcast."+SERVER;

@@ -11,7 +11,6 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +24,7 @@ import com.lebaoxun.websocket.service.IWebSessionMessageService;
  *
  */
 @Component
-@RabbitListener(queues = Constants.BROADCAST)
+@RabbitListener(queues = Constants.BROADCAST_QUQUE)
 public class BroadcastListener {
 
 	private Logger logger = LoggerFactory.getLogger(BroadcastListener.class);
@@ -33,17 +32,18 @@ public class BroadcastListener {
 	@Resource
 	private IWebSessionMessageService webSessionMessageService;
 	
-	@Value("${server:port}")
-	private String port;
+    FanoutExchange fanoutBroadcastExchange() {
+        return new FanoutExchange(Constants.BROADCAST);
+    }
 	
 	@Bean
     public Queue queueWebsocketBroadcast() {
-        return new Queue(Constants.BROADCAST.replaceAll("#", port),true);
+        return new Queue(Constants.BROADCAST_QUQUE,true);
     }
 
     @Bean
-    Binding bindingFanoutExchangeWebsocketBroadcast(Queue queueWebsocketBroadcast, FanoutExchange fanoutExchange) {
-        return BindingBuilder.bind(queueWebsocketBroadcast).to(fanoutExchange);
+    Binding bindingFanoutExchangeWebsocketBroadcast(Queue queueWebsocketBroadcast) {
+        return BindingBuilder.bind(queueWebsocketBroadcast).to(fanoutBroadcastExchange());
     }
 	
 	@RabbitHandler

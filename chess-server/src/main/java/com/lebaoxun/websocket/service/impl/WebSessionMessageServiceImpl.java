@@ -9,17 +9,15 @@ import javax.websocket.Session;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.lebaoxun.commons.beans.BeanFactoryUtils;
-import com.lebaoxun.soa.amqp.core.sender.IRabbitmqSender;
 import com.lebaoxun.websocket.handler.IMessageHandler;
 import com.lebaoxun.websocket.protocol.SocketRequest;
 import com.lebaoxun.websocket.protocol.SocketResponse;
 import com.lebaoxun.websocket.server.Constants;
-import com.lebaoxun.websocket.server.SocketServerHandler;
 import com.lebaoxun.websocket.service.IWebSessionMessageService;
 
 @Service
@@ -82,11 +80,8 @@ public class WebSessionMessageServiceImpl implements IWebSessionMessageService {
 				if(response != null){
 					String message = new Gson().toJson(response);
 					logger.debug("send|message={}",message);
-					Environment env = BeanFactoryUtils.getBean(Environment.class);
-					String port = env.getProperty("server.port");
-					IRabbitmqSender rabbitmqSender = (IRabbitmqSender) BeanFactoryUtils.getBean("baseAmqpSender");
-					logger.debug("send|port={},rabbitmqSender={}",port,rabbitmqSender);
-					rabbitmqSender.sendContractFanout(Constants.BROADCAST.replaceAll("#", port),message);
+					RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
+					rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
 				}
 			}
 		}

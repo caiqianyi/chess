@@ -2,6 +2,7 @@ package com.lebaoxun.websocket.server;
 
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -13,6 +14,8 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -93,15 +96,8 @@ public class SocketServerHandler {
 				if (response != null) {
 					String message = new Gson().toJson(response);
 					logger.debug("send|message={}", message);
-					Environment env = BeanFactoryUtils
-							.getBean(Environment.class);
-					String port = env.getProperty("server.port");
-					IRabbitmqSender rabbitmqSender = (IRabbitmqSender) BeanFactoryUtils
-							.getBean("baseAmqpSender");
-					logger.debug("send|port={},rabbitmqSender={}", port,
-							rabbitmqSender);
-					rabbitmqSender.sendContractTopic(
-							Constants.BROADCAST.replaceAll("#", port), message);
+					RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
+					rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
 				}
 			}
 		}

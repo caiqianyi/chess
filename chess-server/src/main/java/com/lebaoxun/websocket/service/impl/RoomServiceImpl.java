@@ -17,7 +17,6 @@ import com.lebaoxun.soa.core.redis.IRedisHash;
 import com.lebaoxun.websocket.entity.Room;
 import com.lebaoxun.websocket.entity.RoomMember;
 import com.lebaoxun.websocket.entity.User;
-import com.lebaoxun.websocket.protocol.SocketResponse;
 import com.lebaoxun.websocket.service.IRoomService;
 import com.lebaoxun.websocket.service.IUserService;
 

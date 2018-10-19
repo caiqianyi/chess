@@ -9,10 +9,8 @@ import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +24,7 @@ import com.lebaoxun.websocket.service.IWebSessionMessageService;
  *
  */
 @Component
-@RabbitListener(queues = Constants.EXECUTE_MESSAGE)
+@RabbitListener(queues = Constants.EXECUTE_MESSAGE_QUQUE)
 public class ExecuteMessageHandlerListener {
 
 	private Logger logger = LoggerFactory.getLogger(ExecuteMessageHandlerListener.class);
@@ -34,17 +32,19 @@ public class ExecuteMessageHandlerListener {
 	@Resource
 	private IWebSessionMessageService webSessionMessageService;
 	
-	@Value("${server:port}")
-	private String port;
+	@Bean
+    FanoutExchange fanoutExecuteMessage() {
+        return new FanoutExchange(Constants.EXECUTE_MESSAGE);
+    }
 	
 	@Bean
     public Queue queueExecuteMessageHandler() {
-        return new Queue(Constants.EXECUTE_MESSAGE.replaceAll("#", port),true);
+        return new Queue(Constants.EXECUTE_MESSAGE_QUQUE,true);
     }
 
     @Bean
-    Binding bindingFanoutExchangeExecuteMessageHandler(Queue queueExecuteMessageHandler, FanoutExchange fanoutExchange) {
-        return BindingBuilder.bind(queueExecuteMessageHandler).to(fanoutExchange);
+    Binding bindingFanoutExchangeExecuteMessageHandler(Queue queueExecuteMessageHandler) {
+        return BindingBuilder.bind(queueExecuteMessageHandler).to(fanoutExecuteMessage());
     }
 	
 	@RabbitHandler

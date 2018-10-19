@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<title>Socket</title>
+<script type="text/javascript" src="/statics/js/jquery.min.js"></script>
+<script type="text/javascript" src="/statics/js/socket.js"></script>
+<script type="text/javascript">
+var so
+$(function(){
+	var userId = prompt("请输入您的ID?","请在这里输入ID");
+	Socket.prototype.action_200 = function(){
+		if(so != null){
+			var nickname = prompt("请输入您的昵称?");
+			so.sendMessage({"msgId":"10002","params":{"nickname":nickname}});
+		}
+	}
+	so = new Socket(userId);
+	so.connection();
+})
+</script>
+</head>
+
+<body>
+
+</body>
+
+</html>

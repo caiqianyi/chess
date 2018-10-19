@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: websocket-service
+  session:
+    store-type: none
+  freemarker:
+    request-context-attribute: req  #req访问request
+    suffix: .html  #后缀名
+  cloud:
+    config:
+      name: fastfood
+      profile: dev
+      username: shancan
+      password: Scadmin773577
+      uri: http://39.104.97.47:7369
+      label: master
+# Define the port where the Widget Foundry server would be running
+server:
+  port: 8081
+logging:
+  file: /www/logs/${spring.application.name}.log

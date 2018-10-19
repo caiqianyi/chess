@@ -9,10 +9,38 @@
 var so
 $(function(){
 	var userId = prompt("请输入您的ID?","请在这里输入ID");
-	Socket.prototype.action_200 = function(){
+	Socket.prototype.action_200 = function(msg){
 		if(so != null){
-			var nickname = prompt("请输入您的昵称?");
-			so.sendMessage({"msgId":"10002","params":{"nickname":nickname}});
+			console.info(msg);
+			if(msg && msg.response.data){
+				var nickname = prompt("请输入您的昵称?");
+				so.sendMessage({"msgId":"10002","params":{"nickname":nickname}});
+			}
+		}
+	}
+	Socket.prototype.action_10002 = function(msg){
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+msg.from+"登录成功");
+			
+			so.sendMessage({"msgId":"20002"});
+			return;
+		}
+		$("#log").append("<br/>"+msg.from+"登录失败");
+	}
+	Socket.prototype.action_20001 = function(msg){
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+"创建房间"+JSON.stringify(msg));
+			so.sendMessage({"msgId":"20002"});
+			return;
+		}
+	}
+	Socket.prototype.action_20002 = function(msg){
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+"获取房间号"+JSON.stringify(msg));
+			if(!msg.response.data){
+				so.sendMessage({"msgId":"20001"});
+			}
+			return;
 		}
 	}
 	so = new Socket(userId);
@@ -22,7 +50,7 @@ $(function(){
 </head>
 
 <body>
-
+	<div id="log"></div>
 </body>
 
 </html>

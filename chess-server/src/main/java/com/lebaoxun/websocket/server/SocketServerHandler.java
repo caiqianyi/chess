@@ -56,10 +56,13 @@ public class SocketServerHandler {
 					.getBean(IWebSessionMessageService.class);
 			webSessionMessageService.put(userId, session);
 			
+			IUserService userService = BeanFactoryUtils
+					.getBean(IUserService.class);
 			SocketResponse response = new SocketResponse();
 			response.setFrom(userId);
 			response.setMsgId("200");
-			response.setResponse(ResponseMessage.ok());
+			response.setResponse(ResponseMessage.ok(userService.findById(userId)));
+			
 			WebSessionMessageServiceImpl.send(session, new Gson().toJson(response));
 		} catch (I18nMessageException e) {
 			e.printStackTrace();
@@ -97,7 +100,7 @@ public class SocketServerHandler {
 							.getBean("baseAmqpSender");
 					logger.debug("send|port={},rabbitmqSender={}", port,
 							rabbitmqSender);
-					rabbitmqSender.sendContractFanout(
+					rabbitmqSender.sendContractTopic(
 							Constants.BROADCAST.replaceAll("#", port), message);
 				}
 			}

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
@@ -38,12 +39,12 @@ public class ExecuteMessageHandlerListener {
 	
 	@Bean
     public Queue queueExecuteMessageHandler() {
-        return new Queue(Constants.EXECUTE_MESSAGE,true);
+        return new Queue(Constants.EXECUTE_MESSAGE.replaceAll("#", port),true);
     }
 
     @Bean
-    Binding bindingFanoutExchangeExecuteMessageHandler(Queue queueExecuteMessageHandler, TopicExchange topicExchange) {
-        return BindingBuilder.bind(queueExecuteMessageHandler).to(topicExchange).with(Constants.EXECUTE_MESSAGE);
+    Binding bindingFanoutExchangeExecuteMessageHandler(Queue queueExecuteMessageHandler, FanoutExchange fanoutExchange) {
+        return BindingBuilder.bind(queueExecuteMessageHandler).to(fanoutExchange);
     }
 	
 	@RabbitHandler

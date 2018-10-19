@@ -97,7 +97,7 @@ Socket.prototype.connection = function(room,discovery){
 			if(msgAction){
 				msgAction(message);
 			}else{
-				console.info(_this["action_"+message.msgId]);
+				console.info("message nofund action",message);
 			}
 			 // 收到消息，重置定时器
 	        clearTimeout(_this.ws.receiveMessageTimer); 

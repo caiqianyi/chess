@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,8 +42,8 @@ public class BroadcastListener {
     }
 
     @Bean
-    Binding bindingFanoutExchangeWebsocketBroadcast(Queue queueWebsocketBroadcast, TopicExchange topicExchange) {
-        return BindingBuilder.bind(queueWebsocketBroadcast).to(topicExchange).with(Constants.BROADCAST);
+    Binding bindingFanoutExchangeWebsocketBroadcast(Queue queueWebsocketBroadcast, FanoutExchange fanoutExchange) {
+        return BindingBuilder.bind(queueWebsocketBroadcast).to(fanoutExchange);
     }
 	
 	@RabbitHandler

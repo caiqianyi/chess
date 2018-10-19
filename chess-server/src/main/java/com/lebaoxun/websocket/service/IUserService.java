@@ -10,5 +10,7 @@ public interface IUserService {
 	
 	boolean logout(String userId);
 	
-	boolean findById(String userId);
+	User findById(String userId);
+	
+	User update(User user);
 }

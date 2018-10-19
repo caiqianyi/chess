@@ -37,9 +37,13 @@ public class UserServiceImpl implements IUserService {
 			throw new I18nMessageException("500");
 		}
 		if(redisHash.hExists(USER_CACHE_KEY, user.getUserId())){
-			user = (User) redisHash.hGet(USER_CACHE_KEY, user.getUserId());
+			User u = (User) redisHash.hGet(USER_CACHE_KEY, user.getUserId());
 			
-			logger.debug("user={}",new Gson().toJson(user));
+			if(StringUtils.isBlank(u.getNickname())){
+				u.setNickname(user.getNickname());
+			}
+			user = u ;
+			logger.debug("user={}",new Gson().toJson(u));
 		}else{
 			//注冊
 			user.setCreateTime(new Date());
@@ -71,9 +75,23 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-	public boolean findById(String userId) {
+	public User findById(String userId) {
 		// TODO Auto-generated method stub
-		return false;
+		return (User) redisHash.hGet(USER_CACHE_KEY, userId);
+	}
+	
+	@Override
+	public User update(User user) {
+		// TODO Auto-generated method stub
+		if(redisHash.hExists(USER_CACHE_KEY, user.getUserId())){
+			User u = (User) redisHash.hGet(USER_CACHE_KEY, user.getUserId());
+			
+			if(user.getRoomId() != null){
+				u.setRoomId(user.getRoomId());
+			}
+			logger.debug("user={}",new Gson().toJson(u));
+		}
+		return null;
 	}
 
 }

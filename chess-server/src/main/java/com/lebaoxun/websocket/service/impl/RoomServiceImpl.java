@@ -118,6 +118,7 @@ public class RoomServiceImpl implements IRoomService {
 					member.setUser(user);
 					members.add(member);
 				}
+				member.setFlag("0");
 				member.setJoinDate(new Date());
 				room.setMembers(members);
 				user.setRoomId(roomId);
@@ -143,8 +144,8 @@ public class RoomServiceImpl implements IRoomService {
 					RoomMember member = members.get(i);
 					user.setRoomId(null);
 					userService.update(user);
-					
-					members.remove(i);
+					member.setFlag("-1");
+					member.setQuitDate(new Date());
 					room.setMembers(members);
 					redisHash.hSet(ROOM_CACHE_KEY, roomId, room);
 					return member;
@@ -172,6 +173,7 @@ public class RoomServiceImpl implements IRoomService {
 			member.setJoinDate(new Date());
 			member.setRole("Admin");
 			member.setUser(user);
+			member.setFlag("0");
 			List<RoomMember> members = new ArrayList<RoomMember>();
 			members.add(member);
 			room.setMembers(members);

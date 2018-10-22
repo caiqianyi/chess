@@ -63,6 +63,14 @@ $(function(){
 			$("#log").append("<br/>"+msg.from+"退出房间");
 		}
 	}
+	
+	Socket.prototype.action_30001 = function(msg){
+		$("#log").append("<br/>玩家已准备好，可以开始游戏");
+	}
+	
+	Socket.prototype.action_30002 = function(msg){
+		$("#log").append("<br/>玩家移动棋子");
+	}
 	so = new Socket(userId);
 	so.connection();
 })

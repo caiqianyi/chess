@@ -11,6 +11,7 @@ public class RoomMember implements Serializable{
 	private String role;
 	private Date joinDate;
 	private Date quitDate;
+	private String flag;
 	private User user;
 	public String getRole() {
 		return role;
@@ -35,5 +36,11 @@ public class RoomMember implements Serializable{
 	}
 	public void setUser(User user) {
 		this.user = user;
+	}
+	public String getFlag() {
+		return flag;
+	}
+	public void setFlag(String flag) {
+		this.flag = flag;
 	}
 }

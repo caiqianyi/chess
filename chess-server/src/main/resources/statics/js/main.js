@@ -15,9 +15,81 @@ var gameimg = [
                '/statics/images/bg.gif','/statics/images/bg_over.gif',
                '/statics/images/bg_sel.gif'];
 var chess_obj = new ChessClass();
+var so
 
 window.onload = function(){
-	$('init_btn').onclick = function(){
+
+	var userId = prompt("请输入您的ID?","请在这里输入ID");
+	Socket.prototype.action_200 = function(msg){
+		if(so != null){
+			console.info(msg);
+			if(msg && !msg.response.data){
+				var nickname = prompt("请输入您的昵称?");
+				so.sendMessage({"msgId":"10002","params":{"nickname":nickname}});
+			}else{
+				so.sendMessage({"msgId":"10002","params":{"nickname":""}});
+			}
+		}
+	}
+	Socket.prototype.action_10002 = function(msg){
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+msg.from+"登录成功");
+			console.info(msg.from);
+			if(userId == msg.from){
+				so.sendMessage({"msgId":"20002"});
+			}
+			return;
+		}
+		$("#log").append("<br/>"+msg.from+"登录失败");
+	}
+	Socket.prototype.action_20001 = function(msg){
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+"创建房间"+JSON.stringify(msg));
+			so.sendMessage({"msgId":"20002"});
+			return;
+		}
+	}
+	Socket.prototype.action_20002 = function(msg){
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+"获取房间号"+JSON.stringify(msg));
+			if(!msg.response.data){
+				so.sendMessage({"msgId":"20001"});
+				return;
+			}
+			if(userId == msg.from){
+				var room = msg.response.data;
+				so.sendMessage({"msgId":"20003","params":{"roomId":room.id}});
+			}
+		}
+	}
+	Socket.prototype.action_20003 = function(msg){
+		console.info("20003"+JSON.stringify(msg));
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+"进入房间"+JSON.stringify(msg));
+		}
+	}
+	Socket.prototype.action_20004 = function(msg){
+		console.info("20004"+JSON.stringify(msg));
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+msg.from+"退出房间");
+		}
+	}
+	
+	Socket.prototype.action_30001 = function(msg){
+		console.info("30001"+JSON.stringify(msg));
+		//init
+		chess_obj.init();
+	}
+	Socket.prototype.action_30002 = function(msg){
+		console.info("30002"+JSON.stringify(msg));
+		//重绘
+		chess_obj.repaint(msg.response.data);
+	}
+	
+	so = new Socket(userId);
+	so.connection();
+		
+	$ID('init_btn').onclick = function(){
 		chess_obj.init();
 	}
 	var callback = function(){
@@ -41,15 +113,76 @@ function ChessClass(){
 
 
 // init
-ChessClass.prototype.init = function(){
+ChessClass.prototype.init = function(sc){
+	//var sc = JSON.parse('{"red":15,"green":16,"player":3,"isover":0,"chess_all":[{"chess":"a7","type":"a","val":"7","status":-1},{"chess":"a1","type":"a","val":"1","status":1},{"chess":"b5","type":"b","val":"5","status":1},{"chess":"a7","type":"a","val":"7","status":1},{"chess":"a7","type":"a","val":"7","status":1},{"chess":"b7","type":"b","val":"7","status":0},{"chess":"b7","type":"b","val":"7","status":0},{"chess":"b1","type":"b","val":"1","status":0},{"chess":"a6","type":"a","val":"6","status":0},{"chess":"b7","type":"b","val":"7","status":0},{"chess":"a7","type":"a","val":"7","status":0},{"chess":"a2","type":"a","val":"2","status":1},{"chess":"b6","type":"b","val":"6","status":1},{"chess":"a2","type":"a","val":"2","status":0},{"chess":"a5","type":"a","val":"5","status":0},{"chess":"b6","type":"b","val":"6","status":0},{"chess":"a7","type":"a","val":"7","status":0},{"chess":"a3","type":"a","val":"3","status":0},{"chess":"a4","type":"a","val":"4","status":0},{"chess":"a4","type":"a","val":"4","status":1},{"chess":"b7","type":"b","val":"7","status":1},{"chess":"a6","type":"a","val":"6","status":0},{"chess":"b5","type":"b","val":"5","status":0},{"chess":"b3","type":"b","val":"3","status":0},{"chess":"a3","type":"a","val":"3","status":0},{"chess":"b3","type":"b","val":"3","status":0},{"chess":"b4","type":"b","val":"4","status":1},{"chess":"b4","type":"b","val":"4","status":0},{"chess":"a5","type":"a","val":"5","status":0},{"chess":"b2","type":"b","val":"2","status":0},{"chess":"b7","type":"b","val":"7","status":0},{"chess":"b2","type":"b","val":"2","status":0}]}');
+	
 	this.reset_grade();	
 	this.create_board();
-	this.create_chess();
+	if(sc){
+		this.chess = sc.chess_all;
+		this.player = sc.player;
+		$ID('grade_num1').innerHTML = sc.red;
+		$ID('grade_num2').innerHTML = sc.green;
+		$ID('grade_img1').className = $ID('grade_img2').className = 'img';
+		if($ID('grade_img'+this.player))
+			$ID('grade_img'+this.player).className = 'img_on';
+		this.isover = sc.isover;
+		if(this.isover == 1){
+			this.show_grade();
+			disp('init_div','show');
+		}else{
+			var chess = this.chess;
+			for(var i=0,max=chess.length; i<max; i++){
+				if(chess[i].status == 1){
+					$ID(this.getid(i)).innerHTML = '<img src="/statics/images/' + chess[i]['chess'] + '.gif" />';
+				}else if(chess[i].status == -1){
+					var id = this.getid(i);
+					$ID(id).innerHTML = '';
+					$ID(id).className = '';
+				}
+			}
+		}
+	}else{
+		this.create_chess();
+		this.player = 1;
+		this.selected = null;
+		this.isover = 0;
+		disp('init_div','hide');
+	}
 	this.create_event();
-	this.player = 1;
-	this.selected = null;
-	this.isover = 0;
-	disp('init_div','hide');
+}
+
+
+ChessClass.prototype.repaint = function(sc){
+	//var sc = JSON.parse('{"red":15,"green":16,"player":3,"isover":0,"chess_all":[{"chess":"a7","type":"a","val":"7","status":-1},{"chess":"a1","type":"a","val":"1","status":1},{"chess":"b5","type":"b","val":"5","status":1},{"chess":"a7","type":"a","val":"7","status":1},{"chess":"a7","type":"a","val":"7","status":1},{"chess":"b7","type":"b","val":"7","status":0},{"chess":"b7","type":"b","val":"7","status":0},{"chess":"b1","type":"b","val":"1","status":0},{"chess":"a6","type":"a","val":"6","status":0},{"chess":"b7","type":"b","val":"7","status":0},{"chess":"a7","type":"a","val":"7","status":0},{"chess":"a2","type":"a","val":"2","status":1},{"chess":"b6","type":"b","val":"6","status":1},{"chess":"a2","type":"a","val":"2","status":0},{"chess":"a5","type":"a","val":"5","status":0},{"chess":"b6","type":"b","val":"6","status":0},{"chess":"a7","type":"a","val":"7","status":0},{"chess":"a3","type":"a","val":"3","status":0},{"chess":"a4","type":"a","val":"4","status":0},{"chess":"a4","type":"a","val":"4","status":1},{"chess":"b7","type":"b","val":"7","status":1},{"chess":"a6","type":"a","val":"6","status":0},{"chess":"b5","type":"b","val":"5","status":0},{"chess":"b3","type":"b","val":"3","status":0},{"chess":"a3","type":"a","val":"3","status":0},{"chess":"b3","type":"b","val":"3","status":0},{"chess":"b4","type":"b","val":"4","status":1},{"chess":"b4","type":"b","val":"4","status":0},{"chess":"a5","type":"a","val":"5","status":0},{"chess":"b2","type":"b","val":"2","status":0},{"chess":"b7","type":"b","val":"7","status":0},{"chess":"b2","type":"b","val":"2","status":0}]}');
+	
+	//this.reset_grade();	
+	//this.create_board();
+	if(sc){
+		this.chess = sc.chess_all;
+		this.player = sc.player;
+		$ID('grade_num1').innerHTML = sc.red;
+		$ID('grade_num2').innerHTML = sc.green;
+		$ID('grade_img1').className = $ID('grade_img2').className = 'img';
+		if($ID('grade_img'+this.player))
+			$ID('grade_img'+this.player).className = 'img_on';
+		this.isover = sc.isover;
+		if(this.isover == 1){
+			this.show_grade();
+			disp('init_div','show');
+		}else{
+			var chess = this.chess;
+			for(var i=0,max=chess.length; i<max; i++){
+				if(chess[i].status == 1){
+					$ID(this.getid(i)).innerHTML = '<img src="/statics/images/' + chess[i]['chess'] + '.gif" />';
+				}else if(chess[i].status == -1){
+					var id = this.getid(i);
+					$ID(id).innerHTML = '';
+					$ID(id).className = '';
+				}
+			}
+		}
+	}
 }
 
 
@@ -61,9 +194,9 @@ ChessClass.prototype.create_board = function(){
 			board = board + '<div id="' + i + '_' + j + '"><img src="/statics/images/chessbg.gif" /></div>';
 		}
 	}
-	$('board').innerHTML = board;
-	$('board').style.width = this.boardcols * (this.area + 2) + 'px';
-	$('board').style.height = this.boardrows * (this.area + 2) + 'px';
+	$ID('board').innerHTML = board;
+	$ID('board').style.width = this.boardcols * (this.area + 2) + 'px';
+	$ID('board').style.height = this.boardrows * (this.area + 2) + 'px';
 }
 
 
@@ -83,7 +216,7 @@ ChessClass.prototype.create_chess = function(){
 // create event
 ChessClass.prototype.create_event = function(){
 	var self = this;
-	var chess_area = $_tag('div', 'board');
+	var chess_area = $ID_tag('div', 'board');
 	for(var i=0; i<chess_area.length; i++){
 		chess_area[i].onmouseover = function(){	// mouseover
 			if(this.className!='onsel'){
@@ -151,10 +284,10 @@ ChessClass.prototype.action = function(o){
 
 // show chess
 ChessClass.prototype.show = function(index){
-	$(this.getid(index)).innerHTML = '<img src="/statics/images/' + this.chess[index]['chess'] + '.gif" />';
+	$ID(this.getid(index)).innerHTML = '<img src="/statics/images/' + this.chess[index]['chess'] + '.gif" />';
 	this.chess[index]['status'] = 1;	// opened
 	if(this.selected!=null){			// 清空選中
-		$(this.getid(this.selected.index)).className = '';
+		$ID(this.getid(this.selected.index)).className = '';
 		this.selected = null;
 	}	
 	this.change_player();
@@ -165,10 +298,10 @@ ChessClass.prototype.show = function(index){
 // select chess
 ChessClass.prototype.select = function(index){
 	if(this.selected!=null){
-		$(this.getid(this.selected['index'])).className = '';
+		$ID(this.getid(this.selected['index'])).className = '';
 	}
 	this.selected = {'index':index, 'chess':this.chess[index]};
-	$(this.getid(index)).className = 'onsel';
+	$ID(this.getid(index)).className = 'onsel';
 }
 
 
@@ -188,7 +321,7 @@ ChessClass.prototype.kill = function(index){
 		this.chess[index] = {'chess':this.selected['chess']['chess'], 'type':this.selected['chess']['type'], 'val':this.selected['chess']['val'], 'status':this.selected['chess']['status']};
 		this.remove(this.selected['index']);
 		var killed = this.player==1? 2 : 1;
-		$('grade_num' + killed).innerHTML = parseInt($('grade_num' + killed).innerHTML)-1;	
+		$ID('grade_num' + killed).innerHTML = parseInt($ID('grade_num' + killed).innerHTML)-1;	
 		this.show(index);
 	}
 }
@@ -197,8 +330,8 @@ ChessClass.prototype.kill = function(index){
 // remove chess
 ChessClass.prototype.remove = function(index){
 	this.chess[index]['status'] = -1;	// empty
-	$(this.getid(index)).innerHTML = '';
-	$(this.getid(index)).className = '';
+	$ID(this.getid(index)).innerHTML = '';
+	$ID(this.getid(index)).className = '';
 }
 
 
@@ -263,59 +396,66 @@ ChessClass.prototype.can_kill = function(index,selindex){
 ChessClass.prototype.change_player = function(){
 	if(this.player == 1){
 		this.player = 2;	// to green
-		$('grade_img2').className = 'img_on';
-		$('grade_img1').className = 'img';
+		$ID('grade_img2').className = 'img_on';
+		$ID('grade_img1').className = 'img';
 	}else{
 		this.player = 1;	// to red
-		$('grade_img1').className = 'img_on';
-		$('grade_img2').className = 'img';
+		$ID('grade_img1').className = 'img_on';
+		$ID('grade_img2').className = 'img';
 	}
 }
 
 
 // reset grade
 ChessClass.prototype.reset_grade = function(){
-	$('grade_img1').className = 'img_on';
-	$('grade_img2').className = 'img';
-	$('grade_num1').innerHTML = $('grade_num2').innerHTML = 16;
-	$('grade_res1').className = $('grade_res2').className = 'none';
-	$('grade_res1').innerHTML = $('grade_res2').innerHTML = '';
+	$ID('grade_img1').className = 'img_on';
+	$ID('grade_img2').className = 'img';
+	$ID('grade_num1').innerHTML = $ID('grade_num2').innerHTML = 16;
+	$ID('grade_res1').className = $ID('grade_res2').className = 'none';
+	$ID('grade_res1').innerHTML = $ID('grade_res2').innerHTML = '';
 }
 
 
 // game over
 ChessClass.prototype.gameover = function(){
-	if($('grade_num1').innerHTML==0 || $('grade_num2').innerHTML==0){	// 任一方棋子为0
+	var num1 = parseInt($ID('grade_num1').innerHTML);
+	var num2 = parseInt($ID('grade_num2').innerHTML);
+	var can;
+	if(num1 == 0 || num2 == 0){	// 任一方棋子为0
 		this.isover = 1;
 		this.show_grade();
 		disp('init_div','show');
 	}else{
-		if(this.can_action()==false){
+		can = this.can_action(); 
+		if(can == false){
 			this.isover = 1;
 			this.show_grade();
 			disp('init_div','show');
 		}
 	}
+	console.log('Broadcast'+can+':reb['+num1+'] VS green['+num2+']'+this.player);
+	
+	so.sendMessage({"msgId":"30002","params":{"red":num1, "green":num2, "player":this.player, "isover":this.isover, "chess_all":this.chess}});
 }
 
 
 // show grade
 ChessClass.prototype.show_grade = function(){
-	var num1 = parseInt($('grade_num1').innerHTML);
-	var num2 = parseInt($('grade_num2').innerHTML);
+	var num1 = parseInt($ID('grade_num1').innerHTML);
+	var num2 = parseInt($ID('grade_num2').innerHTML);
 	if(num1>num2){ // 红方胜
-		$('grade_res2').innerHTML = 'LOSS';
-		$('grade_res2').className = 'loss';
-		$('grade_res1').innerHTML = 'WIN';
-		$('grade_res1').className = 'win';
+		$ID('grade_res2').innerHTML = 'LOSS';
+		$ID('grade_res2').className = 'loss';
+		$ID('grade_res1').innerHTML = 'WIN';
+		$ID('grade_res1').className = 'win';
 	}else if(num1<num2){ // 黑方胜
-		$('grade_res1').innerHTML = 'LOSS';
-		$('grade_res1').className = 'loss';
-		$('grade_res2').innerHTML = 'WIN';
-		$('grade_res2').className = 'win';
+		$ID('grade_res1').innerHTML = 'LOSS';
+		$ID('grade_res1').className = 'loss';
+		$ID('grade_res2').innerHTML = 'WIN';
+		$ID('grade_res2').className = 'win';
 	}else{	// 平局
-		$('grade_res1').innerHTML = $('grade_res2').innerHTML = 'DRAW';
-		$('grade_res1').className = $('grade_res2').className = 'draw';
+		$ID('grade_res1').innerHTML = $ID('grade_res2').innerHTML = 'DRAW';
+		$ID('grade_res1').className = $ID('grade_res2').className = 'draw';
 	}
 }
 
@@ -350,16 +490,16 @@ ChessClass.prototype.can_action = function(){
 /** common function */
 
 // get document.getElementBy(id)
-function $(id){
+function $ID(id){
 	this.id = id;
 	return document.getElementById(id);
 }
 
 
 // get document.getElementsByTagName
-function $_tag(name, id){
+function $ID_tag(name, id){
 	if(typeof(id)!='undefined'){
-		return $(id).getElementsByTagName(name);
+		return $ID(id).getElementsByTagName(name);
 	}else{
 		return document.getElementsByTagName(name);	
 	}
@@ -372,9 +512,9 @@ function $_tag(name, id){
 */
 function disp(id, handle){
 	if(handle=='show'){
-		$(id).style.display = 'block';
+		$ID(id).style.display = 'block';
 	}else{
-		$(id).style.display = 'none';	
+		$ID(id).style.display = 'none';	
 	}
 }
 

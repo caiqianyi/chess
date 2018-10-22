@@ -38,7 +38,7 @@ public class RoomJoinMessageHandler implements IMessageHandler {
 				response.setFrom(userId);
 				response.setMsgId(Constants.MSG_ACTION_30001);
 				response.setTo(to);
-				response.setResponse(ResponseMessage.ok());
+				response.setResponse(ResponseMessage.ok(roomService.findById(roomId)));
 				webSessionMessageService.broadcastAll(response);
 			}
 			SocketResponse response = new SocketResponse();

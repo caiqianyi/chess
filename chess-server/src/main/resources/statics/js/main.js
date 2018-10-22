@@ -68,10 +68,9 @@ window.onload = function(){
 		if(msg.response.errcode == 0){
 			$("#log").append("<br/>"+"进入房间"+JSON.stringify(msg));
 		}
-		role = msg.response.data.role;
-		$ID('role').innerHTML = role;
-		if(role == 'Player' || role == 'Admin'){
-			chess_obj.create_event();
+		if(userId == msg.from){
+			role = msg.response.data.role;
+			$ID('role').innerHTML = role + ":" + userId;
 		}
 	}
 	Socket.prototype.action_20004 = function(msg){
@@ -155,7 +154,7 @@ ChessClass.prototype.init = function(sc){
 		this.isover = 0;
 		disp('init_div','hide');
 	}
-
+	this.create_event();
 }
 
 
@@ -225,17 +224,19 @@ ChessClass.prototype.create_event = function(){
 	var chess_area = $ID_tag('div', 'board');
 	for(var i=0; i<chess_area.length; i++){
 		chess_area[i].onmouseover = function(){	// mouseover
-			if(this.className!='onsel'){
+			if((role == 'Admin' || role == 'Player') && this.className!='onsel'){
 				this.className = 'on';
 			}
 		}
 		chess_area[i].onmouseout = function(){	// mouseout
-			if(this.className!='onsel'){
+			if((role == 'Admin' || role == 'Player') && this.className!='onsel'){
 				this.className = '';
 			}
 		}
 		chess_area[i].onclick = function(){	// onclick
-			self.action(this);
+			if(role == 'Admin' || role == 'Player'){
+				self.action(this);
+			}
 		}
 	}
 }

@@ -15,7 +15,8 @@ var gameimg = [
                '/statics/images/bg.gif','/statics/images/bg_over.gif',
                '/statics/images/bg_sel.gif'];
 var chess_obj = new ChessClass();
-var so
+var so;
+var role;
 
 window.onload = function(){
 
@@ -66,6 +67,11 @@ window.onload = function(){
 		console.info("20003"+JSON.stringify(msg));
 		if(msg.response.errcode == 0){
 			$("#log").append("<br/>"+"进入房间"+JSON.stringify(msg));
+		}
+		role = msg.response.data.role;
+		$ID('role').innerHTML = role;
+		if(role == 'Player' || role == 'Admin'){
+			chess_obj.create_event();
 		}
 	}
 	Socket.prototype.action_20004 = function(msg){
@@ -149,7 +155,7 @@ ChessClass.prototype.init = function(sc){
 		this.isover = 0;
 		disp('init_div','hide');
 	}
-	this.create_event();
+
 }
 
 
@@ -433,7 +439,6 @@ ChessClass.prototype.gameover = function(){
 			disp('init_div','show');
 		}
 	}
-	console.log('Broadcast'+can+':reb['+num1+'] VS green['+num2+']'+this.player);
 	
 	so.sendMessage({"msgId":"30002","params":{"red":num1, "green":num2, "player":this.player, "isover":this.isover, "chess_all":this.chess}});
 }

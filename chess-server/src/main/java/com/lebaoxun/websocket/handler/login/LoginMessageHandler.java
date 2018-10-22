@@ -36,8 +36,8 @@ public class LoginMessageHandler implements IMessageHandler {
 		user.setUserId(from);
 		user.setNickname((String)request.getParams().get("nickname"));
 		logger.debug("login|user={}",new Gson().toJson(user));
-		userService.login(user, session);
-		return new SocketResponse(request,ResponseMessage.ok());
+		User u = userService.login(user, session);
+		return new SocketResponse(request,ResponseMessage.ok(u));
 	}
 
 }

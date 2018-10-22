@@ -224,17 +224,17 @@ ChessClass.prototype.create_event = function(){
 	var chess_area = $ID_tag('div', 'board');
 	for(var i=0; i<chess_area.length; i++){
 		chess_area[i].onmouseover = function(){	// mouseover
-			if((role == 'Admin' || role == 'Player') && this.className!='onsel'){
+			if(((role == 'Admin' && chess_obj.player == 1) || (role == 'Player' && chess_obj.player == 2)) && this.className!='onsel'){
 				this.className = 'on';
 			}
 		}
 		chess_area[i].onmouseout = function(){	// mouseout
-			if((role == 'Admin' || role == 'Player') && this.className!='onsel'){
+			if(((role == 'Admin' && chess_obj.player == 1) || (role == 'Player' && chess_obj.player == 2)) && this.className!='onsel'){
 				this.className = '';
 			}
 		}
 		chess_area[i].onclick = function(){	// onclick
-			if(role == 'Admin' || role == 'Player'){
+			if((role == 'Admin' && chess_obj.player == 1) || (role == 'Player' && chess_obj.player == 2)) {
 				self.action(this);
 			}
 		}

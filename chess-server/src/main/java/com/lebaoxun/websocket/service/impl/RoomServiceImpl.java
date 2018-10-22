@@ -206,6 +206,24 @@ public class RoomServiceImpl implements IRoomService {
 		}
 		return "-1";
 	}
+	
+	@Override
+	public String restart(String roomId) {
+		Room room = findById(roomId);
+		if(room != null){
+			List<RoomMember> members = room.getMembers();
+			RoomMember mem1 = findMemberByRole(members, "Admin"),
+					mem2 = findMemberByRole(members, "Player");
+			if(mem1 != null && "0".equals(mem1.getFlag()) 
+					&& mem2 != null && "0".equals(mem2.getFlag())){
+				room.setFlag("1");
+				redisHash.hSet(ROOM_CACHE_KEY, roomId, room);
+				return "1";
+			}
+			return "0";
+		}
+		return "-1";
+	}
 
 	private synchronized String getRoomId(Date now) {
 		String date = DateFormatUtils.format(now, "yyyyMMdd");

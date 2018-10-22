@@ -19,4 +19,8 @@ public class Constants {
 	public static final String MSG_ACTION_20003 = "20003";//加入房间
 	public static final String MSG_ACTION_20004 = "20004";//退出房间
 	
+	
+	public static final String MSG_ACTION_30001 = "30001";//游戏棋
+	public static final String MSG_ACTION_30002 = "30002";//游戏棋
+	
 }

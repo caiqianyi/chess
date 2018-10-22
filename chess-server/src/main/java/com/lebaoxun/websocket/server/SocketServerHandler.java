@@ -2,7 +2,6 @@ package com.lebaoxun.websocket.server;
 
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -14,9 +13,7 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
@@ -25,7 +22,6 @@ import com.lebaoxun.commons.beans.BeanFactoryUtils;
 import com.lebaoxun.commons.exception.I18nMessageException;
 import com.lebaoxun.commons.exception.ResponseMessage;
 import com.lebaoxun.commons.utils.StringUtils;
-import com.lebaoxun.soa.amqp.core.sender.IRabbitmqSender;
 import com.lebaoxun.websocket.handler.IMessageHandler;
 import com.lebaoxun.websocket.protocol.SocketRequest;
 import com.lebaoxun.websocket.protocol.SocketResponse;
@@ -95,10 +91,10 @@ public class SocketServerHandler {
 					SocketResponse response = handlerAction.doAction(session,
 							request);
 					if (response != null) {
-						String message = new Gson().toJson(response);
-						logger.debug("send|message={}", message);
-						RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
-						rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
+						
+						IWebSessionMessageService webSessionMessageService = BeanFactoryUtils
+								.getBean(IWebSessionMessageService.class);
+						webSessionMessageService.broadcastAll(response);
 					}
 				}
 			}
@@ -120,6 +116,8 @@ public class SocketServerHandler {
 		try{
 			IMessageHandler handlerAction10003 = (IMessageHandler) BeanFactoryUtils
 					.getBean("msg_action_" + "10003");
+			IWebSessionMessageService webSessionMessageService = BeanFactoryUtils
+					.getBean(IWebSessionMessageService.class);
 			if (handlerAction10003 != null) {
 				SocketRequest request = new SocketRequest();
 				request.setFrom(userId);
@@ -127,10 +125,7 @@ public class SocketServerHandler {
 				SocketResponse response = handlerAction10003.doAction(session,
 						request);
 				if (response != null) {
-					String message = new Gson().toJson(response);
-					logger.debug("send|message={}", message);
-					RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
-					rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
+					webSessionMessageService.broadcastAll(response);
 				}
 			}
 			IMessageHandler handlerAction20004 = (IMessageHandler) BeanFactoryUtils
@@ -142,10 +137,7 @@ public class SocketServerHandler {
 				SocketResponse response = handlerAction20004.doAction(session,
 						request);
 				if (response != null) {
-					String message = new Gson().toJson(response);
-					logger.debug("onClose send|message={}", message);
-					RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
-					rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
+					webSessionMessageService.broadcastAll(response);
 				}
 			}
 		}catch(Exception e){

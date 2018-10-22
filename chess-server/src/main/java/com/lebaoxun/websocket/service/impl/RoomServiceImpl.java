@@ -166,6 +166,7 @@ public class RoomServiceImpl implements IRoomService {
 			room.setGameId(gameId);
 			room.setGameType(gameType);
 			room.setId(roomId);
+			room.setFlag("0");
 			
 			RoomMember member = new RoomMember();
 			member.setJoinDate(new Date());
@@ -181,6 +182,27 @@ public class RoomServiceImpl implements IRoomService {
 			return room;
 		}
 		return null;
+	}
+	
+	@Override
+	public String getFlag(String roomId) {
+		Room room = findById(roomId);
+		if(room != null){
+			if(room.getFlag() == null || "0".equals(room.getFlag())){
+				List<RoomMember> members = room.getMembers();
+				
+				RoomMember mem1 = findMemberByRole(members, "Admin"),
+						mem2 = findMemberByRole(members, "Player");
+				
+				if(mem1 != null && mem2 != null){
+					room.setFlag("1");
+					redisHash.hSet(ROOM_CACHE_KEY, roomId, room);
+					return "3";
+				}
+			}
+			return room.getFlag();
+		}
+		return "-1";
 	}
 
 	private synchronized String getRoomId(Date now) {

@@ -1,4 +1,4 @@
-package com.lebaoxun.websocket.handler.room;
+package com.lebaoxun.websocket.handler.game.chess;
 
 import javax.annotation.Resource;
 import javax.websocket.Session;
@@ -7,17 +7,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.lebaoxun.commons.exception.ResponseMessage;
-import com.lebaoxun.websocket.entity.RoomMember;
+import com.lebaoxun.websocket.entity.User;
 import com.lebaoxun.websocket.handler.IMessageHandler;
 import com.lebaoxun.websocket.protocol.SocketRequest;
 import com.lebaoxun.websocket.protocol.SocketResponse;
 import com.lebaoxun.websocket.server.Constants;
 import com.lebaoxun.websocket.service.IRoomService;
+import com.lebaoxun.websocket.service.IUserService;
 import com.lebaoxun.websocket.service.IWebSessionMessageService;
 
-@Service("msg_action_"+Constants.MSG_ACTION_20003)
-public class RoomJoinMessageHandler implements IMessageHandler {
+@Service("msg_action_"+Constants.MSG_ACTION_30002)
+public class GameStepMessageHandler implements IMessageHandler {
 
+	@Resource
+	private IUserService userService;
+	
 	@Resource
 	private IRoomService roomService;
 	
@@ -28,27 +32,18 @@ public class RoomJoinMessageHandler implements IMessageHandler {
 	public SocketResponse doAction(Session session, SocketRequest request) {
 		// TODO Auto-generated method stub
 		String userId = request.getFrom();
-		String roomId = (String)request.getParams().get("roomId");
-		RoomMember member = roomService.joinRoom(roomId, userId);
+		User user = userService.findById(userId);
 		
-		String to = roomService.getBroadcastTo(roomId);
+		String to = roomService.getBroadcastTo(user.getRoomId());
 		if(StringUtils.isNotBlank(to)){
-			if("3".equals(roomService.getFlag(roomId))){//房间已准备好
-				SocketResponse response = new SocketResponse();
-				response.setFrom(userId);
-				response.setMsgId(Constants.MSG_ACTION_30001);
-				response.setTo(to);
-				response.setResponse(ResponseMessage.ok());
-				webSessionMessageService.broadcastAll(response);
-			}
 			SocketResponse response = new SocketResponse();
 			response.setFrom(userId);
 			response.setMsgId(request.getMsgId());
 			response.setTo(to);
-			response.setResponse(ResponseMessage.ok(member));
+			response.setResponse(ResponseMessage.ok(request.getParams()));
 			return response;
 		}
-		return  null;
+		return null;
 	}
 
 }

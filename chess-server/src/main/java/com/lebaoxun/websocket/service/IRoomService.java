@@ -16,4 +16,6 @@ public interface IRoomService {
 	Room create(String userId, String gameId, String gameType);
 	
 	String getBroadcastTo(String roomId);
+	
+	String getFlag(String roomId);
 }

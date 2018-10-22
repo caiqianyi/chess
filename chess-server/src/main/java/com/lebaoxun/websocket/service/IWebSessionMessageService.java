@@ -17,4 +17,6 @@ public interface IWebSessionMessageService {
 
 	void broadcast(SocketResponse response);
 	
+	void broadcastAll(SocketResponse response);
+	
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.websocket.Session;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,9 @@ public class WebSessionMessageServiceImpl implements IWebSessionMessageService {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	private static Map<String, Session> sessionMap = new HashMap<String, Session>();
+	
+	@Resource
+	private RabbitTemplate rabbitTemplate;
 	
 	@Override
 	public void put(String userId, Session session) {
@@ -58,6 +62,13 @@ public class WebSessionMessageServiceImpl implements IWebSessionMessageService {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public void broadcastAll(SocketResponse response) {
+		// TODO Auto-generated method stub
+		String message = new Gson().toJson(response);
+		rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
 	}
 	
 	@Override

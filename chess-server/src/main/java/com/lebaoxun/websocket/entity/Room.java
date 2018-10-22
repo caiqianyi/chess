@@ -16,6 +16,7 @@ public class Room implements Serializable{
 	private String createBy;
 	private Date createTime;
 	private Date endTime;
+	private String flag;
 	private String logs;
 	private List<RoomMember> members;
 	
@@ -66,5 +67,11 @@ public class Room implements Serializable{
 	}
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
+	}
+	public String getFlag() {
+		return flag;
+	}
+	public void setFlag(String flag) {
+		this.flag = flag;
 	}
 }

@@ -42,17 +42,19 @@ public class RoomServiceImpl implements IRoomService {
 	public Room findById(String roomId) {
 		// TODO Auto-generated method stub
 		logger.debug("roomId={}",roomId);
-		Room room = (Room) redisHash.hGet(ROOM_CACHE_KEY, roomId);
-		if(room != null){
-			List<RoomMember> members = room.getMembers();
-			for(RoomMember member : members){
-				String userId = member.getUser().getUserId();
-				User user = userService.findById(userId);
-				if(user != null){
-					member.setUser(user);
+		if(roomId != null){
+			Room room = (Room) redisHash.hGet(ROOM_CACHE_KEY, roomId);
+			if(room != null){
+				List<RoomMember> members = room.getMembers();
+				for(RoomMember member : members){
+					String userId = member.getUser().getUserId();
+					User user = userService.findById(userId);
+					if(user != null){
+						member.setUser(user);
+					}
 				}
+				return room;
 			}
-			return room;
 		}
 		return null;
 	}

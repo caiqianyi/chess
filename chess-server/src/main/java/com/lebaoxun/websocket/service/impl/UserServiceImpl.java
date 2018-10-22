@@ -86,11 +86,11 @@ public class UserServiceImpl implements IUserService {
 		// TODO Auto-generated method stub
 		if(redisHash.hExists(USER_CACHE_KEY, user.getUserId())){
 			User u = (User) redisHash.hGet(USER_CACHE_KEY, user.getUserId());
-			
 			if(user.getRoomId() != null){
 				u.setRoomId(user.getRoomId());
 			}
-			logger.debug("user={}",new Gson().toJson(u));
+			redisHash.hSet(USER_CACHE_KEY, user.getUserId(), user);
+			logger.debug("update}user={}",new Gson().toJson(u));
 		}
 		return null;
 	}

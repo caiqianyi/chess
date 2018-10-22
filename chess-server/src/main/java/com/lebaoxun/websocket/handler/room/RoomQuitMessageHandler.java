@@ -26,7 +26,7 @@ public class RoomQuitMessageHandler implements IMessageHandler {
 		String userId = request.getFrom();
 		RoomMember member = roomService.quitRoom(userId);
 		String to = roomService.getBroadcastTo(member.getUser().getRoomId());
-		if(StringUtils.isBlank(to)){
+		if(StringUtils.isNotBlank(to)){
 			SocketResponse response = new SocketResponse();
 			response.setFrom(userId);
 			response.setMsgId(request.getMsgId());

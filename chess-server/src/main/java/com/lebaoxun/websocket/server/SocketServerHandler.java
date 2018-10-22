@@ -124,8 +124,14 @@ public class SocketServerHandler {
 				SocketRequest request = new SocketRequest();
 				request.setFrom(userId);
 				request.setMsgId("10003");
-				handlerAction10003.doAction(session,
+				SocketResponse response = handlerAction10003.doAction(session,
 						request);
+				if (response != null) {
+					String message = new Gson().toJson(response);
+					logger.debug("send|message={}", message);
+					RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
+					rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
+				}
 			}
 			IMessageHandler handlerAction20004 = (IMessageHandler) BeanFactoryUtils
 					.getBean("msg_action_" + "20004");
@@ -133,8 +139,14 @@ public class SocketServerHandler {
 				SocketRequest request = new SocketRequest();
 				request.setFrom(userId);
 				request.setMsgId("20004");
-				handlerAction20004.doAction(session,
+				SocketResponse response = handlerAction20004.doAction(session,
 						request);
+				if (response != null) {
+					String message = new Gson().toJson(response);
+					logger.debug("onClose send|message={}", message);
+					RabbitTemplate rabbitTemplate = (RabbitTemplate) BeanFactoryUtils.getBean(RabbitTemplate.class);
+					rabbitTemplate.convertAndSend(Constants.BROADCAST, Constants.BROADCAST_QUQUE, message);
+				}
 			}
 		}catch(Exception e){
 			e.printStackTrace();

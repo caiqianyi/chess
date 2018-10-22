@@ -135,6 +135,7 @@ Socket.prototype.connection = function(room,discovery){
 
 Socket.prototype.sendMessage = function(m){
 	var message = $.extend({"from":this.userId},m);
+	console.info("Socket.sendMessage",message);
 	this.ws.send(JSON.stringify(message));
 };
 

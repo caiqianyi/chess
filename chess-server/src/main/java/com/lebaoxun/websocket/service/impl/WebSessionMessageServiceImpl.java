@@ -45,6 +45,7 @@ public class WebSessionMessageServiceImpl implements IWebSessionMessageService {
 			String tos[] = response.getTo().split(";");
 			for (String userId : tos) {
 				Session session = sessionMap.get(userId);
+				logger.debug("session={},userId={}",session,userId);
 				if(session != null){
 					send(session, new Gson().toJson(response));
 				}
@@ -90,7 +91,10 @@ public class WebSessionMessageServiceImpl implements IWebSessionMessageService {
 	
 	public static void send(Session session,String message) {
 		try {
-			session.getBasicRemote().sendText(message);
+			
+			if(session.isOpen()){
+				session.getBasicRemote().sendText(message);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

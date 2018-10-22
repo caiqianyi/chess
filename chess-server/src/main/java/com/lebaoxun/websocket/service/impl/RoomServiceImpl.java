@@ -10,6 +10,8 @@ import javax.annotation.Resource;
 
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ import com.lebaoxun.websocket.service.IUserService;
 
 @Service
 public class RoomServiceImpl implements IRoomService {
+	
+	private Logger logger = LoggerFactory.getLogger(getClass());
 	
 	@Resource
 	private IRedisHash redisHash;
@@ -37,6 +41,7 @@ public class RoomServiceImpl implements IRoomService {
 	@Override
 	public Room findById(String roomId) {
 		// TODO Auto-generated method stub
+		logger.debug("roomId={}",roomId);
 		Room room = (Room) redisHash.hGet(ROOM_CACHE_KEY, roomId);
 		if(room != null){
 			List<RoomMember> members = room.getMembers();

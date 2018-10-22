@@ -23,8 +23,10 @@ $(function(){
 	Socket.prototype.action_10002 = function(msg){
 		if(msg.response.errcode == 0){
 			$("#log").append("<br/>"+msg.from+"登录成功");
-			
-			so.sendMessage({"msgId":"20002"});
+			console.info(msg.from);
+			if(userId == msg.from){
+				so.sendMessage({"msgId":"20002"});
+			}
 			return;
 		}
 		$("#log").append("<br/>"+msg.from+"登录失败");
@@ -43,14 +45,22 @@ $(function(){
 				so.sendMessage({"msgId":"20001"});
 				return;
 			}
-			var room = msg.response.data;
-			so.sendMessage({"msgId":"20003","params":{"roomId":room.id}});
+			if(userId == msg.from){
+				var room = msg.response.data;
+				so.sendMessage({"msgId":"20003","params":{"roomId":room.id}});
+			}
 		}
 	}
 	Socket.prototype.action_20003 = function(msg){
 		console.info("20003"+JSON.stringify(msg));
 		if(msg.response.errcode == 0){
 			$("#log").append("<br/>"+"进入房间"+JSON.stringify(msg));
+		}
+	}
+	Socket.prototype.action_20004 = function(msg){
+		console.info("20004"+JSON.stringify(msg));
+		if(msg.response.errcode == 0){
+			$("#log").append("<br/>"+msg.from+"退出房间");
 		}
 	}
 	so = new Socket(userId);

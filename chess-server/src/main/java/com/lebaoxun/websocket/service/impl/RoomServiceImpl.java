@@ -42,17 +42,19 @@ public class RoomServiceImpl implements IRoomService {
 	public Room findById(String roomId) {
 		// TODO Auto-generated method stub
 		logger.debug("roomId={}",roomId);
-		Room room = (Room) redisHash.hGet(ROOM_CACHE_KEY, roomId);
-		if(room != null){
-			List<RoomMember> members = room.getMembers();
-			for(RoomMember member : members){
-				String userId = member.getUser().getUserId();
-				User user = userService.findById(userId);
-				if(user != null){
-					member.setUser(user);
+		if(roomId != null){
+			Room room = (Room) redisHash.hGet(ROOM_CACHE_KEY, roomId);
+			if(room != null){
+				List<RoomMember> members = room.getMembers();
+				for(RoomMember member : members){
+					String userId = member.getUser().getUserId();
+					User user = userService.findById(userId);
+					if(user != null){
+						member.setUser(user);
+					}
 				}
+				return room;
 			}
-			return room;
 		}
 		return null;
 	}
@@ -142,8 +144,6 @@ public class RoomServiceImpl implements IRoomService {
 				int i = findMember(members, userId);
 				if(i > -1){
 					RoomMember member = members.get(i);
-					user.setRoomId(null);
-					userService.update(user);
 					member.setFlag("-1");
 					member.setQuitDate(new Date());
 					room.setMembers(members);
@@ -203,6 +203,24 @@ public class RoomServiceImpl implements IRoomService {
 				}
 			}
 			return room.getFlag();
+		}
+		return "-1";
+	}
+	
+	@Override
+	public String restart(String roomId) {
+		Room room = findById(roomId);
+		if(room != null){
+			List<RoomMember> members = room.getMembers();
+			RoomMember mem1 = findMemberByRole(members, "Admin"),
+					mem2 = findMemberByRole(members, "Player");
+			if(mem1 != null && "0".equals(mem1.getFlag()) 
+					&& mem2 != null && "0".equals(mem2.getFlag())){
+				room.setFlag("1");
+				redisHash.hSet(ROOM_CACHE_KEY, roomId, room);
+				return "1";
+			}
+			return "0";
 		}
 		return "-1";
 	}

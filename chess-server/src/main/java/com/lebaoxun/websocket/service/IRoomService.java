@@ -18,4 +18,6 @@ public interface IRoomService {
 	String getBroadcastTo(String roomId);
 	
 	String getFlag(String roomId);
+	
+	String restart(String roomId);
 }

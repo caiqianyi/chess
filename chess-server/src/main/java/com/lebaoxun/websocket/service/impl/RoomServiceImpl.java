@@ -144,8 +144,6 @@ public class RoomServiceImpl implements IRoomService {
 				int i = findMember(members, userId);
 				if(i > -1){
 					RoomMember member = members.get(i);
-					user.setRoomId(null);
-					userService.update(user);
 					member.setFlag("-1");
 					member.setQuitDate(new Date());
 					room.setMembers(members);
